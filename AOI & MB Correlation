@@ -1,0 +1,30 @@
+#AOI & MB Correlaiton
+#Engabreen
+
+# Read the datasets
+E_massbalance <- read_excel("~/Desktop/E_massbalance.xlsx")
+NAO1 <- read_excel("~/Desktop/AOI.xlsx")
+
+# Filter data for the periods 1989-1999 and 2000-2023
+E_massbalance_pre2000 <- E_massbalance %>% filter(Year >= 1970 & Year <= 1999)
+AOI_pre2000 <- AOI %>% filter(year >= 1970 & year <= 1999)
+
+E_massbalance_post2000 <- E_massbalance %>% filter(Year >= 2000 & Year <= 2023)
+AOI_post2000 <- AOI %>% filter(Year >= 2000 & Year <= 2023)
+
+# Merge the mass balance and NAO data
+data_pre2000 <- merge(E_massbalance_pre2000, AOI_pre2000, by = "Year")
+data_post2000 <- merge(E_massbalance_post2000, AOI_post2000, by = "Year")
+
+# Perform Pearson correlation test for pre-2000
+cor_test_pre2000 <- cor.test(data_pre2000$mb1999, data_pre2000$AOI)
+
+# Perform Pearson correlation test for post-2000
+cor_test_post2000 <- cor.test(data_post2000$mb2000, data_post2000$AOI)
+
+# Print the full results
+cat("Pearson Correlation (1970-1999):\n")
+print(cor_test_pre2000)
+
+cat("\nPearson Correlation (2000-2023):\n")
+print(cor_test_post2000)
