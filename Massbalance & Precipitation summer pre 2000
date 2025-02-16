@@ -1,0 +1,64 @@
+#Massbalance & Precipitation summer pre 2000
+
+#Load Files
+mass_balance_path <- "~/Desktop/E_massbalance.xlsx"
+summer_temp_path <- "~/Desktop/TP_B2000.nc"  # Update to the summer temperature data file
+
+# Load mass balance data
+mass_balance_data <- read_excel(mass_balance_path)
+print(head(mass_balance_data))
+
+# Open the summer temperature NetCDF file
+nc <- nc_open(summer_temp_path)
+
+# Extract variables
+tp <- ncvar_get(nc, "tp")
+lat <- ncvar_get(nc, "latitude")
+lon <- ncvar_get(nc, "longitude")
+time <- ncvar_get(nc, "valid_time")
+
+# Get time units for conversion
+time_units <- ncatt_get(nc, "valid_time", "units")$value
+print(time_units)  # Check time format
+
+# Engabreen coordinates
+target_lat <- 66 + 40 / 60  
+target_lon <- 13 + 45 / 60  
+
+# Find the nearest grid point
+lat_index <- which.min(abs(lat - target_lat))
+lon_index <- which.min(abs(lon - target_lon))
+
+# Extract Precip time series for Engabreen
+summer_precip <- tp[lon_index, lat_index, ]
+
+# Convert time to Date
+valid_time_date <- as.POSIXct(time, origin = "1970-01-01", tz = "UTC")
+
+# Extract year and month
+years <- as.numeric(format(valid_time_date, "%Y"))
+months <- as.numeric(format(valid_time_date, "%m"))
+
+# Filter for June, July, and August only (summer months)
+summer_df <- data.frame(year = years, month = months, precipitation = summer_precip)
+summer_df <- summer_df %>%
+  filter(month %in% c(6, 7, 8)) %>%  # Summer months: June, July, August
+  group_by(year) %>%
+  summarise(summer_avg_precip = mean(precipitation, na.rm = TRUE))
+
+# Merge with mass balance data
+mass_balance_data <- mass_balance_data %>% select(Year, mbs1999)  # Use 'mbs1999' for summer data
+merged_data <- merge(mass_balance_data, summer_df, by.x = "Year", by.y = "year")
+print(head(merged_data))
+
+# Filter for pre-2000 data
+pre2000_data <- merged_data %>% filter(Year < 2000)
+print(unique(pre2000_data$Year))
+pre2000_data$mbs1999 <- as.numeric(pre2000_data$mbs1999)  # Use 'mbs1999' for summer mass balance
+
+# Pearson correlation test 
+correlation_test <- cor.test(pre2000_data$mbs1999, pre2000_data$summer_avg_precip, method = "pearson")
+print(correlation_test)
+
+# Close NetCDF file
+nc_close(nc)
