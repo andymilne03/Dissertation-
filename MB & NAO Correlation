@@ -1,0 +1,29 @@
+#Massbalance and NAO Correlaiton Analysis
+
+# Read the datasets
+N_massbalance <- read_excel("~/Desktop/N_massbalance.xlsx")
+NAOI <- read_excel("~/Desktop/NAOI.xlsx")
+
+# Filter data for the periods 1989-1999 and 2000-2023
+N_massbalance_pre2000 <- N_massbalance %>% filter(Year >= 1989 & Year <= 1999)
+NAOI_pre2000 <- NAOI %>% filter(Year >= 1989 & Year <= 1999)
+
+N_massbalance_post2000 <- N_massbalance %>% filter(Year >= 2000 & Year <= 2023)
+NAOI_post2000 <- NAO1 %>% filter(Year >= 2000 & Year <= 2023)
+
+# Merge the mass balance and NAO data for each period
+data_pre2000 <- merge(N_massbalance_pre2000, NAOI_pre2000, by = "Year")
+data_post2000 <- merge(N_massbalance_post2000, NAi_post2000, by = "Year")
+
+# Perform Pearson correlation test for pre-2000
+cor_test_pre2000 <- cor.test(data_pre2000$mb1999, data_pre2000$NAO)
+
+# Perform Pearson correlation test for post-2000
+cor_test_post2000 <- cor.test(data_post2000$mb2000, data_post2000$NAO)
+
+# Print results
+cat("Pearson Correlation (1989-1999):\n")
+print(cor_test_pre2000)
+
+cat("\nPearson Correlation (2000-2023):\n")
+print(cor_test_post2000)
