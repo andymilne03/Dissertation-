@@ -1,4 +1,5 @@
 #Massbalance and NAO Correlaiton Analysis
+#Nigardsbreen
 
 # Read the datasets
 N_massbalance <- read_excel("~/Desktop/N_massbalance.xlsx")
