@@ -1,0 +1,22 @@
+#NAOI & MB Redundency Analysis
+
+# Load mass balance data
+mass_balance <- read_excel("~/Desktop/E_massbalance.xlsx")
+nao_index <- read_excel("~/Desktop/NAOI.xlsx")
+
+# Merge datasets by Year
+combined_data <- merge(mass_balance, nao_index, by = "Year")
+
+# Split data into pre-2000 and post-2000
+pre_2000 <- subset(combined_data, Year >= 1970 & Year <= 1999)
+post_2000 <- subset(combined_data, Year >= 2000 & Year <= 2018)
+
+# Perform Linear Regression for Pre-2000 Data
+lm_pre <- lm(mb1999 ~ NAO, data = pre_2000)
+lm_post <- lm(mb2000 ~ NAO, data = post_2000)
+
+# Summarize results
+summary(lm_pre)
+summary(lm_post)
+
+
